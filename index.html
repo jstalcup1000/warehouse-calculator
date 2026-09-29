@@ -62,6 +62,18 @@
       <input type="number" id="totalCases" min="0" value="237">
     </label>
     <div class="result" id="palletResult"></div>
+
+    <h3>Height Check</h3>
+    <label>Case height (in)
+      <input type="number" id="caseHeight" min="0" step="0.1" value="10">
+    </label>
+    <label>Pallet base height (in)
+      <input type="number" id="baseHeight" min="0" step="0.1" value="6">
+    </label>
+    <label>Max pallet height (in)
+      <input type="number" id="maxHeight" min="0" step="0.1" value="60">
+    </label>
+    <div class="result" id="heightResult"></div>
   </div>
 
   <!-- Cycle count variance calculator -->
@@ -94,6 +106,19 @@
         `<b>${cases}</b> cases per pallet<br><b>${cube.toFixed(2)}</b> cu ft per pallet<br>` +
         `<b>${pallets}</b> pallets needed for ${total} cases` +
         (pallets > 0 ? ` (last pallet: ${lastPallet} cases)` : "");
+
+      const caseHeight = num("caseHeight");
+      const maxHeight = num("maxHeight");
+      const height = num("baseHeight") + num("hi") * caseHeight;
+      const tooTall = height > maxHeight;
+      const maxLayers = caseHeight === 0 ? 0 : Math.floor((maxHeight - num("baseHeight")) / caseHeight);
+      const heightBox = document.getElementById("heightResult");
+      heightBox.classList.toggle("warn", tooTall);
+      heightBox.innerHTML =
+        `Built height: <b>${height.toFixed(1)}"</b> (max ${maxHeight}")<br>` +
+        (tooTall
+          ? `⚠️ Too tall: max ${Math.max(maxLayers, 0)} layers at this case height`
+          : "✅ Within height limit");
     }
 
     function updateVariance() {
