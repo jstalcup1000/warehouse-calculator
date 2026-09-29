@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warehouse Calculator</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f5f7;
+      margin: 0;
+      padding: 16px;
+      color: #222;
+    }
+    h1 { text-align: center; margin-bottom: 4px; }
+    p.subtitle { text-align: center; margin-top: 0; color: #666; }
+    .card {
+      background: white;
+      max-width: 480px;
+      margin: 16px auto;
+      padding: 16px 20px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    label { display: block; margin-top: 10px; font-weight: 600; }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      font-size: 16px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .result {
+      margin-top: 14px;
+      padding: 10px;
+      background: #eef6ee;
+      border-radius: 6px;
+      font-size: 17px;
+    }
+    .warn { background: #fdecea; }
+  </style>
+</head>
+<body>
+  <h1>Warehouse Calculator</h1>
+  <p class="subtitle">Pallet build and cycle count variance</p>
+
+  <!-- Pallet calculator -->
+  <div class="card">
+    <h2>Pallet Build</h2>
+    <label>Cases per layer (Ti)
+      <input type="number" id="ti" min="0" value="10">
+    </label>
+    <label>Layers per pallet (Hi)
+      <input type="number" id="hi" min="0" value="5">
+    </label>
+    <label>Case cube (cu ft)
+      <input type="number" id="caseCube" min="0" step="0.01" value="1.25">
+    </label>
+    <div class="result" id="palletResult"></div>
+  </div>
+
+  <!-- Cycle count variance calculator -->
+  <div class="card">
+    <h2>Cycle Count Variance</h2>
+    <label>System OHB
+      <input type="number" id="systemQty" min="0" value="120">
+    </label>
+    <label>Counted quantity
+      <input type="number" id="countedQty" min="0" value="114">
+    </label>
+    <label>Tolerance (%)
+      <input type="number" id="tolerance" min="0" step="0.1" value="2">
+    </label>
+    <div class="result" id="varianceResult"></div>
+  </div>
+
+  <script>
+    function num(id) {
+      return parseFloat(document.getElementById(id).value) || 0;
+    }
+
+    function updatePallet() {
+      const cases = num("ti") * num("hi");
+      const cube = cases * num("caseCube");
+      document.getElementById("palletResult").innerHTML =
+        `<b>${cases}</b> cases per pallet<br><b>${cube.toFixed(2)}</b> cu ft total`;
+    }
+
+    function updateVariance() {
+      const system = num("systemQty");
+      const counted = num("countedQty");
+      const diff = counted - system;
+      const pct = system === 0 ? 0 : (diff / system) * 100;
+      const outOfTolerance = Math.abs(pct) > num("tolerance");
+      const box = document.getElementById("varianceResult");
+      box.classList.toggle("warn", outOfTolerance);
+      box.innerHTML =
+        `Variance: <b>${diff > 0 ? "+" : ""}${diff}</b> units (<b>${pct.toFixed(1)}%</b>)<br>` +
+        (outOfTolerance ? "⚠️ Outside tolerance: recount" : "✅ Within tolerance");
+    }
+
+    // Recalculate whenever any input changes
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", () => { updatePallet(); updateVariance(); });
+    });
+    updatePallet();
+    updateVariance();
+  </script>
+</body>
+</html>
