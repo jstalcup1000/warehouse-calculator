@@ -58,6 +58,9 @@
     <label>Case cube (cu ft)
       <input type="number" id="caseCube" min="0" step="0.01" value="1.25">
     </label>
+    <label>Total cases to ship
+      <input type="number" id="totalCases" min="0" value="237">
+    </label>
     <div class="result" id="palletResult"></div>
   </div>
 
@@ -84,8 +87,13 @@
     function updatePallet() {
       const cases = num("ti") * num("hi");
       const cube = cases * num("caseCube");
+      const total = num("totalCases");
+      const pallets = cases === 0 ? 0 : Math.ceil(total / cases);
+      const lastPallet = cases === 0 ? 0 : total % cases || (total > 0 ? cases : 0);
       document.getElementById("palletResult").innerHTML =
-        `<b>${cases}</b> cases per pallet<br><b>${cube.toFixed(2)}</b> cu ft total`;
+        `<b>${cases}</b> cases per pallet<br><b>${cube.toFixed(2)}</b> cu ft per pallet<br>` +
+        `<b>${pallets}</b> pallets needed for ${total} cases` +
+        (pallets > 0 ? ` (last pallet: ${lastPallet} cases)` : "");
     }
 
     function updateVariance() {
